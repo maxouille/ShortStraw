@@ -5,15 +5,26 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Maxence Bobin on 05/11/14.
  */
 public class DrawingPanel extends View {
+
+
+    private ArrayList<PointF> pointList = new ArrayList<PointF>();
+    private ArrayList<PointF> resamplePointList = new ArrayList<PointF>();
+
+    float distance = 0;
 
     //drawing path
     private Path drawPath;
@@ -76,11 +87,15 @@ public class DrawingPanel extends View {
                 drawPath.moveTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
-                drawPath.lineTo(touchX, touchY);
+                pointList.add(new PointF(touchX, touchY));
+                //drawPath.lineTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
-                drawCanvas.drawPath(drawPath, drawPaint);
-                drawPath.reset();
+                //drawCanvas.drawPath(drawPath, drawPaint);
+                //drawPath.reset();
+                for (PointF p : pointList) {
+                    drawCanvas.drawPoint(p.x, p.y, drawPaint);
+                }
                 break;
             default:
                 return false;
