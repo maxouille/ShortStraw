@@ -1,6 +1,9 @@
 package com.master.shortstraw;
 
 import android.content.Context;
+import android.gesture.GesturePoint;
+import android.gesture.GestureUtils;
+import android.gesture.OrientedBoundingBox;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -8,6 +11,8 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,10 +26,16 @@ import java.util.List;
 public class DrawingPanel extends View {
 
 
-    private ArrayList<PointF> pointList = new ArrayList<PointF>();
+    private ArrayList<GesturePoint> pointList = new ArrayList<GesturePoint>();
     private ArrayList<PointF> resamplePointList = new ArrayList<PointF>();
 
     float distance = 0;
+
+    private int interSpacingConstant = 40;
+    private double boundingBoxDiagonal = 0;
+    private double interSpacingDistance = 0;
+
+    private long startDrawingTime = 0;
 
     //drawing path
     private Path drawPath;
@@ -84,18 +95,45 @@ public class DrawingPanel extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                startDrawingTime = System.currentTimeMillis();
                 drawPath.moveTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
-                pointList.add(new PointF(touchX, touchY));
-                //drawPath.lineTo(touchX, touchY);
+                long time = System.currentTimeMillis() - startDrawingTime;
+                pointList.add(new GesturePoint(touchX, touchY, time));
+                drawCanvas.drawPoint(touchX, touchY, drawPaint);
+                drawPath.lineTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
+                //Reset drawingTime
+                startDrawingTime = 0;
+
                 //drawCanvas.drawPath(drawPath, drawPaint);
-                //drawPath.reset();
-                for (PointF p : pointList) {
-                    drawCanvas.drawPoint(p.x, p.y, drawPaint);
-                }
+
+                //Get the top left corner point and the bottom right corner point
+                PointF[] points = getPointsBoundingBox();
+                PointF topLeftPoint = points[0];
+                PointF bottomRightPoint = points[1];
+
+                RectF boundingBox = new RectF(topLeftPoint.x, topLeftPoint.y, bottomRightPoint.x, bottomRightPoint.y);
+
+                //Get the boundingBox diagonal
+                boundingBoxDiagonal = getBoundingBoxDiagonal(boundingBox);
+
+                //Compute the insertSpacing distance
+                interSpacingDistance = boundingBoxDiagonal / interSpacingConstant;
+
+                Paint p = new Paint();
+                p.setColor(0xFF66DD00);
+                p.setAntiAlias(true);
+                p.setStrokeWidth(20);
+                p.setStyle(Paint.Style.STROKE);
+                p.setStrokeJoin(Paint.Join.ROUND);
+                p.setStrokeCap(Paint.Cap.ROUND);
+                drawCanvas.drawRect(boundingBox, p);
+
+                drawPath.reset();
+                pointList.clear();
                 break;
             default:
                 return false;
@@ -105,10 +143,44 @@ public class DrawingPanel extends View {
         return true;
     }
 
+    private double getBoundingBoxDiagonal (RectF box) {
+        //Apply Pythagore
+        double height = box.height();
+        double width = box.width();
+        double diag = Math.sqrt(height*height + width*width);
+        return diag;
+    }
+
+    /**
+     *
+     * @return the top left corner point and the bottom right corner point of a point list
+     */
+    private PointF[] getPointsBoundingBox () {
+        float minX = pointList.get(0).x;
+        float maxX = pointList.get(0).x;
+        float minY = pointList.get(0).y;
+        float maxY = pointList.get(0).y;
+        for (GesturePoint p : pointList) {
+            if (p.x < minX) {
+                minX = p.x;
+            }
+            if (p.x > maxX) {
+                maxX = p.x;
+            }
+            if (p.y < minY) {
+                minY = p.y;
+            }
+            if (p.y > maxY) {
+                maxY = p.y;
+            }
+        }
+        return new PointF[]{new PointF(minX, minY), new PointF(maxX, maxY)};
+    }
 
     public void reset () {
         drawPath.reset();
         drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        pointList.clear();
         invalidate();
     }
 }
