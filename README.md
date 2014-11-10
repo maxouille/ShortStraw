@@ -5,7 +5,7 @@ This is an implementation of the ShortStraw Algorithm you can find here : http:/
 
 My project is an Android application.
 
-** INSTALL **
+**INSTALL & Launch**
 
 * Download the .zip archive and import the project in Android-Studio.
 * Launch the app
