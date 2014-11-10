@@ -11,3 +11,4 @@ My project is an Android application.
 * Launch the app
 * That's it !
 
+*If you want the APK file, please contact me on my GitHub account.*
