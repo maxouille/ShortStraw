@@ -1,25 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <ImageButton
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:id="@+id/resetButton"
         android:src="@drawable/reset"
         android:scaleType="fitXY"/>
+
+    <ImageButton
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/strokeButton"
+        android:src="@drawable/line"
+        android:scaleType="fitXY"
+        android:layout_toRightOf="@id/resetButton"/>
+
+    <ImageButton
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/pointsButton"
+        android:src="@drawable/point"
+        android:scaleType="fitXY"
+        android:layout_toRightOf="@id/strokeButton"/>
+
+    <ImageButton
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/sampleButton"
+        android:src="@drawable/sample"
+        android:scaleType="fitXY"
+        android:layout_toRightOf="@id/pointsButton"/>
+
+    <ImageButton
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/boxButton"
+        android:src="@drawable/rect"
+        android:scaleType="fitXY"
+        android:layout_toRightOf="@id/sampleButton"/>
+
+    <ImageButton
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/cornerButton"
+        android:src="@drawable/corner"
+        android:scaleType="fitXY"
+        android:layout_toRightOf="@id/boxButton"/>
 
 
     <com.master.shortstraw.DrawingPanel
         android:id="@+id/drawingPanel"
         android:layout_width="fill_parent"
-        android:layout_height="0dp"
+        android:layout_height="fill_parent"
         android:layout_marginBottom="3dp"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:layout_marginTop="3dp"
-        android:layout_weight="1"
-        android:background="#FFFFFFFF" />
+        android:background="#FFFFFFFF"
+        android:layout_below="@id/resetButton"/>
 
-</LinearLayout>
+</RelativeLayout>

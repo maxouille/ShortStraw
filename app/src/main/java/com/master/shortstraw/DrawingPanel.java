@@ -27,7 +27,7 @@ public class DrawingPanel extends View {
     //drawing path
     private Path drawPath;
     //drawing and canvas paint
-    private Paint drawPaintLine, drawPaintPoints, drawPaintCorners, canvasPaint;
+    private Paint drawPaintLine, drawPaintPoints, drawPaintSampledPoints, drawPaintCorners, drawPaintBox, canvasPaint;
     //initial color
     private int paintColor = 0xFF660000;
     //canvas
@@ -35,12 +35,23 @@ public class DrawingPanel extends View {
     //canvas bitmap
     private Bitmap canvasBitmap;
 
+    private boolean drawLine = true;
+    private boolean drawPoints = false;
+    private boolean drawSampledPoints = false;
+    private boolean drawBox = false;
+    private boolean drawCorners = true;
+
+    private ArrayList<PointF> cornerPoints;
+    private ShortStraw ss;
+
     public DrawingPanel(Context context, AttributeSet attrs){
         super(context, attrs);
         setupDrawing();
     }
 
     private void setupDrawing() {
+        ss = new ShortStraw(this);
+
         drawPath = new Path();
 
         //Set the drawPaintLine
@@ -63,6 +74,14 @@ public class DrawingPanel extends View {
         drawPaintPoints.setStrokeJoin(Paint.Join.ROUND);
         drawPaintPoints.setStrokeCap(Paint.Cap.ROUND);
 
+        //Set the drawPaintSampledPoints
+        drawPaintSampledPoints = new Paint();
+        drawPaintSampledPoints.setColor(0xFFDD2200);
+        drawPaintSampledPoints.setAntiAlias(true);
+        drawPaintSampledPoints.setStrokeWidth(20);
+        drawPaintSampledPoints.setStyle(Paint.Style.STROKE);
+        drawPaintSampledPoints.setStrokeJoin(Paint.Join.ROUND);
+        drawPaintSampledPoints.setStrokeCap(Paint.Cap.ROUND);
 
         //Set the drawPaintCorner
         drawPaintCorners = new Paint();
@@ -73,8 +92,16 @@ public class DrawingPanel extends View {
         drawPaintCorners.setStrokeJoin(Paint.Join.ROUND);
         drawPaintCorners.setStrokeCap(Paint.Cap.ROUND);
 
-        canvasPaint = new Paint(Paint.DITHER_FLAG);
+        //Set the drawPaintBox
+        drawPaintBox = new Paint();
+        drawPaintBox.setColor(0xFF662200);
+        drawPaintBox.setAntiAlias(true);
+        drawPaintBox.setStrokeWidth(20);
+        drawPaintBox.setStyle(Paint.Style.STROKE);
+        drawPaintBox.setStrokeJoin(Paint.Join.ROUND);
+        drawPaintBox.setStrokeCap(Paint.Cap.ROUND);
 
+        canvasPaint = new Paint(Paint.DITHER_FLAG);
     }
 
     /** Called when the custom view is assigned a size
@@ -93,7 +120,40 @@ public class DrawingPanel extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
-        canvas.drawPath(drawPath, drawPaintLine);
+
+        //Draw the boundingBox
+        if (drawBox) {
+            drawCanvas.drawRect(ss.getBoundingBox(), drawPaintBox);
+        }
+
+        if (drawLine) {
+            //Draw the stroke
+            drawCanvas.drawPath(drawPath, drawPaintLine);
+        }
+
+        if(drawPoints) {
+            //Draw the points not sampled
+            for (PointF po : pointList) {
+                drawCanvas.drawPoint(po.x, po.y, drawPaintPoints);
+            }
+        }
+
+        //Draw sampled points
+        if (drawSampledPoints) {
+            for (PointF p : ss.getResampledPoints()) {
+                drawCanvas.drawPoint(p.x, p.y, drawPaintSampledPoints);
+            }
+        }
+
+        //Check if there is no error or if the list is not empty
+        if (cornerPoints != null && cornerPoints.size() != 0) {
+            if (drawCorners) {
+                //Draw corners
+                for (PointF po : cornerPoints) {
+                    drawCanvas.drawPoint(po.x, po.y, drawPaintCorners);
+                }
+            }
+        }
     }
 
     @Override
@@ -103,6 +163,9 @@ public class DrawingPanel extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                //Reset drawPath and pointList
+                drawPath.reset();
+                pointList.clear();
                 drawPath.moveTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -110,27 +173,10 @@ public class DrawingPanel extends View {
                 drawPath.lineTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
-                //Draw the stroke
-                drawCanvas.drawPath(drawPath, drawPaintLine);
+                ss = new ShortStraw(this);
+                cornerPoints = ss.getCornerPoints(pointList);
 
-                //Draw the points not sampled
-                for (PointF po : pointList) {
-                    drawCanvas.drawPoint(po.x, po.y, drawPaintPoints);
-                }
 
-                ShortStraw ss = new ShortStraw();
-                ArrayList<PointF> cornerPoints = ss.getCornerPoints(pointList);
-
-                //Check if there is no error or if the list is not empty
-                if (cornerPoints != null && cornerPoints.size() != 0) {
-                    //Draw corners
-                    for (PointF po : cornerPoints) {
-                        drawCanvas.drawPoint(po.x, po.y, drawPaintCorners);
-                    }
-                }
-
-                drawPath.reset();
-                pointList.clear();
                 break;
             default:
                 return false;
@@ -138,6 +184,70 @@ public class DrawingPanel extends View {
 
         invalidate();
         return true;
+    }
+
+    public boolean isDrawLine() {
+        return drawLine;
+    }
+
+    public void setDrawLine(boolean drawLine) {
+        this.drawLine = drawLine;
+    }
+
+    public boolean isDrawPoints() {
+        return drawPoints;
+    }
+
+    public void setDrawPoints(boolean drawPoints) {
+        this.drawPoints = drawPoints;
+    }
+
+    public boolean isDrawSampledPoints() {
+        return drawSampledPoints;
+    }
+
+    public void setDrawSampledPoints(boolean drawSampledPoints) {
+        this.drawSampledPoints = drawSampledPoints;
+    }
+
+    public boolean isDrawBox() {
+        return drawBox;
+    }
+
+    public void setDrawBox(boolean drawBox) {
+        this.drawBox = drawBox;
+    }
+
+    public boolean isDrawCorners() {
+        return drawCorners;
+    }
+
+    public void setDrawCorners(boolean drawCorners) {
+        this.drawCorners = drawCorners;
+    }
+
+    public Paint getDrawPaintBox() {
+        return drawPaintBox;
+    }
+
+    public void setDrawPaintBox(Paint drawPaintBox) {
+        this.drawPaintBox = drawPaintBox;
+    }
+
+    public Paint getDrawPaintSampledPoints() {
+        return drawPaintSampledPoints;
+    }
+
+    public void setDrawPaintSampledPoints(Paint drawPaintSampledPoints) {
+        this.drawPaintSampledPoints = drawPaintSampledPoints;
+    }
+
+    public Canvas getDrawCanvas() {
+        return drawCanvas;
+    }
+
+    public void setDrawCanvas(Canvas drawCanvas) {
+        this.drawCanvas = drawCanvas;
     }
 
     public void reset () {

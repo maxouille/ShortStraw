@@ -1,7 +1,9 @@
 package com.master.shortstraw;
 
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +18,12 @@ public class ShortStraw {
     private double MEDIAN_TRESHOLD = 0.95;
     private double LINE_TGRESHOLD = 0.95;
 
-    public ShortStraw () {
+    private DrawingPanel drawingPanel;
+    private RectF boundingBox = new RectF();
+    private ArrayList<PointF> resampledPoints = new ArrayList<PointF>();
+
+    public ShortStraw (DrawingPanel drawingPanel) {
+        this.drawingPanel = drawingPanel;
     }
 
     /**
@@ -27,15 +34,17 @@ public class ShortStraw {
         if (pList.isEmpty() || pList.size() < 2) {
             return null;
         }
-        float interSpacingDistance = (float) determineResamplingSpacing(pList);
-        ArrayList<PointF> resampledPoints = resampling(pList, interSpacingDistance);
-        ArrayList<Integer> indicesPoints = getCorners(resampledPoints);
-        ArrayList<PointF> cornerPoints = new ArrayList<PointF>();
-        for (int i = 0; i < indicesPoints.size(); i++) {
-            PointF p = resampledPoints.get(indicesPoints.get(i));
-            cornerPoints.add(new PointF(p.x, p.y));
+        else {
+            float interSpacingDistance = (float) determineResamplingSpacing(pList);
+            resampledPoints = resampling(pList, interSpacingDistance);
+            ArrayList<Integer> indicesPoints = getCorners(resampledPoints);
+            ArrayList<PointF> cornerPoints = new ArrayList<PointF>();
+            for (int i = 0; i < indicesPoints.size(); i++) {
+                PointF p = resampledPoints.get(indicesPoints.get(i));
+                cornerPoints.add(new PointF(p.x, p.y));
+            }
+            return cornerPoints;
         }
-        return cornerPoints;
     }
 
     /**
@@ -59,7 +68,7 @@ public class ShortStraw {
         PointF topLeftPoint = points[0];
         PointF bottomRightPoint = points[1];
 
-        //RectF boundingBox = new RectF(topLeftPoint.x, topLeftPoint.y, bottomRightPoint.x, bottomRightPoint.y);
+        boundingBox = new RectF(topLeftPoint.x, topLeftPoint.y, bottomRightPoint.x, bottomRightPoint.y);
 
         //Get the boundingBox diagonal
         double boundingBoxDiagonal = distance(topLeftPoint, bottomRightPoint);
@@ -281,5 +290,21 @@ public class ShortStraw {
     private double distance(PointF p1, PointF p2) {
         double d = (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y);
         return Math.sqrt(d);
+    }
+
+    public RectF getBoundingBox() {
+        return boundingBox;
+    }
+
+    public void setBoundingBox(RectF boundingBox) {
+        this.boundingBox = boundingBox;
+    }
+
+    public ArrayList<PointF> getResampledPoints() {
+        return resampledPoints;
+    }
+
+    public void setResampledPoints(ArrayList<PointF> resampledPoints) {
+        this.resampledPoints = resampledPoints;
     }
 }
