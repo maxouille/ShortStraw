@@ -45,20 +45,14 @@ public class ShapeDetector {
             case 2:
                 p1 = corners.get(0);
                 p2 = corners.get(1);
-                Log.d("test", "distance between 2 points :"+distance(p1, p2));
                 if(distance(p1, p2) < CLOSE_RANGE_LINE) {
                     PointF p = getMiddlePoint(p1, p2);
                     drawingPanel.addPoint(p);
-                    /*drawingPanel.setDrawLine(false);
-                    drawingPanel.invalidate();
-                    drawingPanel.getDrawCanvas().drawPoint(p.x, p.y, drawPaintShape);*/
                 }
                 //Draw a line
                 else {
                     drawingPanel.addLine(new Line(p1, p2));
-/*                    drawingPanel.setDrawLine(false);
-                    drawingPanel.getDrawCanvas().drawLine(p1.x, p1.y, p2.x, p2.y, drawPaintShape);
-  */              }
+                }
                 break;
             //It is a curve or a polyLine
             case 3:
@@ -72,27 +66,12 @@ public class ShapeDetector {
                 p4 = corners.get(3);
 
                 if (distance(p1, p4) < CLOSE_RANGE_TRIANGLE) {
-
-                    Path triangle = new Path();
                     PointF middle = getMiddlePoint(p1, p4);
-                    triangle.moveTo(middle.x, middle.y);
-                    triangle.lineTo(p2.x, p2.y);
-                    triangle.lineTo(p3.x, p3.y);
-                    triangle.close();
                     drawingPanel.addTriangle(new Triangle(middle, p2, p3));
-                    /*drawingPanel.setDrawLine(false);
-                    drawingPanel.getDrawCanvas().drawPath(triangle, drawPaintShape);*/
                 }
                 else {
                     drawingPanel.addPolyLine(new PolyLine(corners));
-                    Path polyLine = new Path();
-                    polyLine.moveTo(p1.x, p1.y);
-                    polyLine.lineTo(p2.x, p2.y);
-                    polyLine.lineTo(p3.x, p3.y);
-                    polyLine.lineTo(p4.x, p4.y);/*
-                    drawingPanel.setDrawLine(false);
-                    drawingPanel.getDrawCanvas().drawPath(polyLine, drawPaintShape);
-                */}
+                }
                 break;
             //Square or polyLine
             case 5:
@@ -110,6 +89,7 @@ public class ShapeDetector {
                     pl.add(p2);
                     pl.add(p3);
                     pl.add(p4);
+                    pl.add(middle);
                     drawingPanel.addPolyLine(new PolyLine(pl));
                 }
                 //It is a polyLine
