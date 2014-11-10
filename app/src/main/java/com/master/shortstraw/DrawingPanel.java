@@ -253,6 +253,7 @@ public class DrawingPanel extends View {
     public void reset () {
         drawPath.reset();
         drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        cornerPoints.clear();
         pointList.clear();
         invalidate();
     }
