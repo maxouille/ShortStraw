@@ -121,9 +121,12 @@ public class DrawingPanel extends View {
                 ShortStraw ss = new ShortStraw();
                 ArrayList<PointF> cornerPoints = ss.getCornerPoints(pointList);
 
-                //Draw corners
-                for (PointF po : cornerPoints) {
-                    drawCanvas.drawPoint(po.x, po.y, drawPaintCorners);
+                //Check if there is no error or if the list is not empty
+                if (cornerPoints != null && cornerPoints.size() != 0) {
+                    //Draw corners
+                    for (PointF po : cornerPoints) {
+                        drawCanvas.drawPoint(po.x, po.y, drawPaintCorners);
+                    }
                 }
 
                 drawPath.reset();
