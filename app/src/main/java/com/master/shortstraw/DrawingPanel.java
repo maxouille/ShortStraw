@@ -1,6 +1,7 @@
 package com.master.shortstraw;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -12,6 +13,11 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import com.master.shortstraw.Model.Line;
+import com.master.shortstraw.Model.PolyLine;
+import com.master.shortstraw.Model.Square;
+import com.master.shortstraw.Model.Triangle;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +33,7 @@ public class DrawingPanel extends View {
     //drawing path
     private Path drawPath;
     //drawing and canvas paint
-    private Paint drawPaintLine, drawPaintPoints, drawPaintSampledPoints, drawPaintCorners, drawPaintBox, canvasPaint;
+    private Paint drawPaintLine, drawPaintPoints, drawPaintSampledPoints, drawPaintCorners, drawPaintBox, drawPaintShape, canvasPaint;
     //initial color
     private int paintColor = 0xFF660000;
     //canvas
@@ -41,8 +47,15 @@ public class DrawingPanel extends View {
     private boolean drawBox = false;
     private boolean drawCorners = true;
 
-    private ArrayList<PointF> cornerPoints;
+    private ArrayList<PointF> cornerPoints = new ArrayList<PointF>();
     private ShortStraw ss;
+    private ShapeDetector sd;
+
+    private ArrayList<PointF> pList = new ArrayList<PointF>();
+    private ArrayList<Line> lineList = new ArrayList<Line>();
+    private ArrayList<Triangle> triangleList = new ArrayList<Triangle>();
+    private ArrayList<Square> squareList = new ArrayList<Square>();
+    private ArrayList<PolyLine> polyLineList = new ArrayList<PolyLine>();
 
     public DrawingPanel(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -101,7 +114,18 @@ public class DrawingPanel extends View {
         drawPaintBox.setStrokeJoin(Paint.Join.ROUND);
         drawPaintBox.setStrokeCap(Paint.Cap.ROUND);
 
+        //Set the drawPaintBox
+        drawPaintShape = new Paint();
+        drawPaintShape.setColor(0xFF000000);
+        drawPaintShape.setAntiAlias(true);
+        drawPaintShape.setStrokeWidth(20);
+        drawPaintShape.setStyle(Paint.Style.STROKE);
+        drawPaintShape.setStrokeJoin(Paint.Join.ROUND);
+        drawPaintShape.setStrokeCap(Paint.Cap.ROUND);
+
         canvasPaint = new Paint(Paint.DITHER_FLAG);
+
+        sd = new ShapeDetector(cornerPoints, this);
     }
 
     /** Called when the custom view is assigned a size
@@ -154,6 +178,34 @@ public class DrawingPanel extends View {
                 }
             }
         }
+
+        //draw shapes
+        for (PointF p : pList) {
+            drawCanvas.drawPoint(p.x, p.y, drawPaintShape);
+        }
+
+        for (Line l : lineList) {
+            drawCanvas.drawLine(l.getP1().x, l.getP1().y, l.getP2().x, l.getP2().y, drawPaintShape);
+        }
+
+        for (Triangle t : triangleList) {
+            Path triangle = new Path();
+            triangle.moveTo(t.getP1().x, t.getP1().y);
+            triangle.lineTo(t.getP2().x, t.getP2().y);
+            triangle.lineTo(t.getP3().x, t.getP3().y);
+            triangle.close();
+            drawCanvas.drawPath(triangle, drawPaintShape);
+        }
+
+        for (PolyLine pl : polyLineList) {
+            ArrayList<PointF> pList = pl.getPointList();
+            Path plPath = new Path();
+            plPath.moveTo(pList.get(0).x, pList.get(0).y);
+            for (int i = 1; i < pList.size(); i++) {
+                plPath.lineTo(pList.get(i).x, pList.get(i).y);
+            }
+            drawCanvas.drawPath(plPath, drawPaintShape);
+        }
     }
 
     @Override
@@ -163,6 +215,7 @@ public class DrawingPanel extends View {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                restorDefaultBooleans();
                 //Reset drawPath and pointList
                 drawPath.reset();
                 pointList.clear();
@@ -173,9 +226,15 @@ public class DrawingPanel extends View {
                 drawPath.lineTo(touchX, touchY);
                 break;
             case MotionEvent.ACTION_UP:
+                drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                drawLine = false;
                 ss = new ShortStraw(this);
                 cornerPoints = ss.getCornerPoints(pointList);
 
+                //Set the cornerPoints into the shapeDetector
+                sd.setCorners(cornerPoints);
+
+                sd.detection();
 
                 break;
             default:
@@ -186,6 +245,9 @@ public class DrawingPanel extends View {
         return true;
     }
 
+    /**
+     * GETTERS AND SETTERS
+     */
     public boolean isDrawLine() {
         return drawLine;
     }
@@ -234,6 +296,14 @@ public class DrawingPanel extends View {
         this.drawPaintBox = drawPaintBox;
     }
 
+    public Paint getDrawPaintShape() {
+        return drawPaintShape;
+    }
+
+    public void setDrawPaintShape(Paint drawPaintShape) {
+        this.drawPaintShape = drawPaintShape;
+    }
+
     public Paint getDrawPaintSampledPoints() {
         return drawPaintSampledPoints;
     }
@@ -250,11 +320,71 @@ public class DrawingPanel extends View {
         this.drawCanvas = drawCanvas;
     }
 
+    /**
+     * Save a point into the list
+     * @param p
+     */
+    public void addPoint (PointF p) {
+        pList.add(p);
+    }
+
+    /**
+     * Save a line into the list
+     * @param l
+     */
+    public void addLine (Line l) {
+        lineList.add(l);
+    }
+
+    /**
+     * Save a triangle into the list
+     * @param t
+     */
+    public void addTriangle (Triangle t) {
+        triangleList.add(t);
+    }
+
+    /**
+     * Save a square into the list
+     * @param s
+     */
+    public void addSquare (Square s) {
+        squareList.add(s);
+    }
+
+    /**
+     * Save a polyLine into the list
+     * @param pl
+     */
+    public void  addPolyLine (PolyLine pl) {
+        polyLineList.add(pl);
+    }
+
+    /**
+     * Restore the default boolean for a new Path
+     */
+    public void restorDefaultBooleans() {
+        drawLine = true;
+        drawPoints = false;
+        drawSampledPoints = false;
+        drawBox = false;
+        drawCorners = true;
+    }
+
+    /**
+     * Reset the canvas
+     */
     public void reset () {
         drawPath.reset();
         drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
         cornerPoints.clear();
         pointList.clear();
+        restorDefaultBooleans();
+        pList.clear();
+        lineList.clear();
+        triangleList.clear();
+        squareList.clear();
+        polyLineList.clear();
         invalidate();
     }
 }
