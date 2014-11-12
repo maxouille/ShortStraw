@@ -13,6 +13,7 @@ import com.master.shortstraw.Model.Triangle;
 import com.master.shortstraw.Model.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by Maxence Bobin on 10/11/14.
@@ -26,7 +27,7 @@ public class ShapeDetector {
     private int CLOSE_RANGE_LINE = 50;
     private int CLOSE_RANGE_TRIANGLE = 50;
     private int CLOSE_RANGE_SQUARE = 50;
-    private int LENGTH_ERROR = 50;
+    private int LENGTH_ERROR = 200;
 
     public ShapeDetector (ArrayList<PointF> corners, DrawingPanel drawingPanel) {
         this.corners = corners;
@@ -96,6 +97,16 @@ public class ShapeDetector {
                     //Sort points to be A top left, B top right, C bottom right and D bottom left
                     ArrayList<PointF> sortedPoints = sortPoints (middle, p2, p3, p4);
 
+                    Log.d("test", "middle "+middle.toString());
+                    Log.d("test", "p2 "+p2.toString());
+                    Log.d("test", "p3 " + p3.toString());
+                    Log.d("test", "p4 " + p4.toString());
+                    Log.d("test", "sortedPoints lenght : " + sortedPoints.size());
+
+                    Log.d("test", "sort 0 " + sortedPoints.get(0).toString());
+                    Log.d("test", "sort 1 "+sortedPoints.get(1).toString());
+                    Log.d("test", "sort 2 "+sortedPoints.get(2).toString());
+                    Log.d("test", "sort 3 " + sortedPoints.get(3).toString());
                     PointF A = sortedPoints.get(0);
                     PointF B = sortedPoints.get(1);
                     PointF C = sortedPoints.get(2);
@@ -105,6 +116,8 @@ public class ShapeDetector {
                     AB.setX(A.x, B.x);
                     AB.setY(A.y, B.y);
 
+                    Log.d("test", "D : "+D.x+ " and "+D.y);
+                    Log.d("test", "C : "+C.x+ " and "+C.y);
                     DC.setX(D.x, C.x);
                     DC.setY(D.y, C.y);
 
@@ -175,17 +188,15 @@ public class ShapeDetector {
         PointF bar = MathTools.getBarycenter(l);
         float middleX = bar.x;
         float middleY = bar.y;
+        PointF p;
         for (int i = 0; i < 4; i++) {
-            if (l.get(i).x < middleX && l.get(i).y < middleY) res[0] = l.get(i);
-            if (l.get(i).x > middleX && l.get(i).y > middleY) res[1] = l.get(i);
-            if (l.get(i).x > middleX && l.get(i).y < middleY) res[2] = l.get(i);
-            if (l.get(i).x < middleX && l.get(i).y > middleY) res[3] = l.get(i);
+            p = l.get(i);
+            if (p.x < middleX && p.y < middleY) res[0] = p;
+            if (p.x > middleX && p.y > middleY) res[1] = p;
+            if (p.x > middleX && p.y < middleY) res[2] = p;
+            if (p.x < middleX && p.y > middleY) res[3] = p;
         }
-        ArrayList<PointF> res2 = new ArrayList<PointF>();
-        for (PointF p : res) {
-            res2.add(p);
-        }
-        return res2;
+        return new ArrayList<PointF>(Arrays.asList(res));
     }
 
     private PointF getMiddlePoint (PointF p1, PointF p2) {

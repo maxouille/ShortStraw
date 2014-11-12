@@ -144,17 +144,17 @@ public class DrawingPanel extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
-
+/*
         //Draw the boundingBox
         if (drawBox) {
             drawCanvas.drawRect(ss.getBoundingBox(), drawPaintBox);
         }
-
+*/
         if (drawLine) {
             //Draw the stroke
             drawCanvas.drawPath(drawPath, drawPaintLine);
         }
-
+/*
         if(drawPoints) {
             //Draw the points not sampled
             for (PointF po : pointList) {
@@ -197,17 +197,6 @@ public class DrawingPanel extends View {
             drawCanvas.drawPath(triangle, drawPaintShape);
         }
 
-        for (Square s : squareList) {
-            drawCanvas.save();
-            PointF bar = s.getBaryCenter();
-            float length = s.getEdgeLength()/2;
-            canvas.rotate(s.getAngle(), s.getBaryCenter().x, s.getBaryCenter().y);
-            RectF square = new RectF(bar.x-length, bar.y-length, bar.x+length, bar.y+length);
-            drawCanvas.drawRect(square, drawPaintShape);
-            drawCanvas.restore();
-        }
-
-
         for (PolyLine pl : polyLineList) {
             ArrayList<PointF> pList = pl.getPointList();
             Path plPath = new Path();
@@ -216,7 +205,24 @@ public class DrawingPanel extends View {
                 plPath.lineTo(pList.get(i).x, pList.get(i).y);
             }
             drawCanvas.drawPath(plPath, drawPaintShape);
+        }*/
+
+        Log.d("test", "squarelist size : "+squareList.size());
+        for (Square s : squareList) {
+            drawCanvas.save();
+            PointF bar = s.getBaryCenter();
+            Log.d("test", "bary : x : "+bar.x + " y : "+bar.y);
+            float length = s.getEdgeLength()/2;
+            Log.d("test", "lenght of edge : "+length);
+            Log.d("test", "angle : "+s.getAngle());
+            drawCanvas.rotate(-s.getAngle(), s.getBaryCenter().x, s.getBaryCenter().y);
+            RectF square = new RectF(bar.x-length, bar.y-length, bar.x+length, bar.y+length);
+            drawCanvas.drawRect(square, drawPaintShape);
+            drawCanvas.restore();
         }
+
+
+
     }
 
     @Override

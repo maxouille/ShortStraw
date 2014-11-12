@@ -39,6 +39,7 @@ public class ShortStraw {
         else {
             float interSpacingDistance = (float) determineResamplingSpacing(pList);
             resampledPoints = resampling(pList, interSpacingDistance);
+            Log.d("test", "nb points : "+resampledPoints.size());
             ArrayList<Integer> indicesPoints = getCorners(resampledPoints);
             ArrayList<PointF> cornerPoints = new ArrayList<PointF>();
             for (int i = 0; i < indicesPoints.size(); i++) {
@@ -120,38 +121,40 @@ public class ShortStraw {
         //Create a new ArrayList for the straws
         ArrayList<Float> straws = new ArrayList<Float>();
 
-        //Add the distance between the i - STRAW_WINDOW and i + STRAW_WINDOW points
-        for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
-            PointF point1 = resamplePointList.get(i - STRAW_WINDOW);
-            PointF point2 = resamplePointList.get(i + STRAW_WINDOW);
-            straws.add((float) MathTools.distance(point1, point2));
-        }
-
-        //Calculate the median of the straws
-        float t = (float) (median(straws) * MEDIAN_TRESHOLD);
-
-        for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
-            float s = straws.get(i - STRAW_WINDOW);
-            //If straw < median
-            if (s < t) {
-                double localMin = Double.POSITIVE_INFINITY;
-                int localMinIndex = i;
-                //Retrieve the local min
-                while (i < straws.size() && s < t) {
-                    if (s < localMin) {
-                        localMin = s;
-                        localMinIndex = i;
-                    }
-                    i++;
-                    s = straws.get(i - STRAW_WINDOW);
-                }
-                //Add the local min index to the array list
-                corners.add(localMinIndex);
+        if (resamplePointList.size() > STRAW_WINDOW) {
+            //Add the distance between the i - STRAW_WINDOW and i + STRAW_WINDOW points
+            for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
+                PointF point1 = resamplePointList.get(i - STRAW_WINDOW);
+                PointF point2 = resamplePointList.get(i + STRAW_WINDOW);
+                straws.add(MathTools.distance(point1, point2));
             }
+
+            //Calculate the median of the straws
+            float t = (float) (median(straws) * MEDIAN_TRESHOLD);
+
+            for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
+                float s = straws.get(i - STRAW_WINDOW);
+                //If straw < median
+                if (s < t) {
+                    double localMin = Double.POSITIVE_INFINITY;
+                    int localMinIndex = i;
+                    //Retrieve the local min
+                    while (i < straws.size() && s < t) {
+                        if (s < localMin) {
+                            localMin = s;
+                            localMinIndex = i;
+                        }
+                        i++;
+                        s = straws.get(i - STRAW_WINDOW);
+                    }
+                    //Add the local min index to the array list
+                    corners.add(localMinIndex);
+                }
+            }
+            //Add the last index
+            corners.add(resamplePointList.size() - 1);
+            corners = postProcessCorners(resamplePointList, corners, straws);
         }
-        //Add the last index
-        corners.add(resamplePointList.size() - 1);
-        corners = postProcessCorners(resamplePointList, corners, straws);
         return corners;
     }
 
@@ -161,6 +164,7 @@ public class ShortStraw {
      */
     private float median (ArrayList<Float> values) {
         //Sort the array List into ascending order
+        Log.d("test", "values length : " +values.size());
         Collections.sort(values);
         int m;
         if (values.size() / 2 == 0) {

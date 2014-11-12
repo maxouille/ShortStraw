@@ -42,7 +42,9 @@ public class MathTools {
      */
     public static float getAngle (Vector2D v) {
         Vector2D horizontal = new Vector2D(1,0);
-        return (float) Math.acos( dot(v, horizontal) / (norm(v) * norm(horizontal)));
+        double res = Math.acos( dot(v, horizontal) / (norm(v) * norm(horizontal)));
+        double res2 = res*180/Math.PI;
+        return (float) res2;
     }
 
     /**
