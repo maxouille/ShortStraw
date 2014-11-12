@@ -197,6 +197,17 @@ public class DrawingPanel extends View {
             drawCanvas.drawPath(triangle, drawPaintShape);
         }
 
+        for (Square s : squareList) {
+            drawCanvas.save();
+            PointF bar = s.getBaryCenter();
+            float length = s.getEdgeLength()/2;
+            canvas.rotate(s.getAngle(), s.getBaryCenter().x, s.getBaryCenter().y);
+            RectF square = new RectF(bar.x-length, bar.y-length, bar.x+length, bar.y+length);
+            drawCanvas.drawRect(square, drawPaintShape);
+            drawCanvas.restore();
+        }
+
+
         for (PolyLine pl : polyLineList) {
             ArrayList<PointF> pList = pl.getPointList();
             Path plPath = new Path();

@@ -6,8 +6,11 @@ import android.graphics.PointF;
 import android.util.Log;
 
 import com.master.shortstraw.Model.Line;
+import com.master.shortstraw.Model.MathTools;
 import com.master.shortstraw.Model.PolyLine;
+import com.master.shortstraw.Model.Square;
 import com.master.shortstraw.Model.Triangle;
+import com.master.shortstraw.Model.Vector2D;
 
 import java.util.ArrayList;
 
@@ -23,6 +26,7 @@ public class ShapeDetector {
     private int CLOSE_RANGE_LINE = 50;
     private int CLOSE_RANGE_TRIANGLE = 50;
     private int CLOSE_RANGE_SQUARE = 50;
+    private int LENGTH_ERROR = 50;
 
     public ShapeDetector (ArrayList<PointF> corners, DrawingPanel drawingPanel) {
         this.corners = corners;
@@ -45,7 +49,7 @@ public class ShapeDetector {
             case 2:
                 p1 = corners.get(0);
                 p2 = corners.get(1);
-                if(distance(p1, p2) < CLOSE_RANGE_LINE) {
+                if(MathTools.distance(p1, p2) < CLOSE_RANGE_LINE) {
                     PointF p = getMiddlePoint(p1, p2);
                     drawingPanel.addPoint(p);
                 }
@@ -65,7 +69,7 @@ public class ShapeDetector {
                 p3 = corners.get(2);
                 p4 = corners.get(3);
 
-                if (distance(p1, p4) < CLOSE_RANGE_TRIANGLE) {
+                if (MathTools.distance(p1, p4) < CLOSE_RANGE_TRIANGLE) {
                     PointF middle = getMiddlePoint(p1, p4);
                     drawingPanel.addTriangle(new Triangle(middle, p2, p3));
                 }
@@ -80,17 +84,76 @@ public class ShapeDetector {
                 p3 = corners.get(2);
                 p4 = corners.get(3);
                 PointF p5 = corners.get(4);
+                PointF middle;
+                Vector2D AB = new Vector2D();
+                Vector2D DC = new Vector2D();
+                Vector2D AD = new Vector2D();
+                Vector2D BC = new Vector2D();
                 //It is a quadrangle
-                if (distance(p1, p5) < CLOSE_RANGE_SQUARE) {
-                    PointF middle = getMiddlePoint(p1, p5);
-                    //TODO : check rect/square/trapeze
+                if (MathTools.distance(p1, p5) < CLOSE_RANGE_SQUARE) {
+                    middle = getMiddlePoint(p1, p5);
+
+                    //Sort points to be A top left, B top right, C bottom right and D bottom left
+                    ArrayList<PointF> sortedPoints = sortPoints (middle, p2, p3, p4);
+
+                    PointF A = sortedPoints.get(0);
+                    PointF B = sortedPoints.get(1);
+                    PointF C = sortedPoints.get(2);
+                    PointF D = sortedPoints.get(3);
+
+                    //Set coordinates for the 4 vectors (AB/DC and AD/BC)
+                    AB.setX(A.x, B.x);
+                    AB.setY(A.y, B.y);
+
+                    DC.setX(D.x, C.x);
+                    DC.setY(D.y, C.y);
+
+                    AD.setX(A.x, D.x);
+                    AD.setY(A.y, D.y);
+
+                    BC.setX(B.x, C.x);
+                    BC.setY(B.y, C.y);
+
+                    //If all edge have quite the same length
+                    //Square or Losange
+                    if (Math.abs(AB.length()-BC.length()) < LENGTH_ERROR &&
+                            Math.abs(BC.length()-DC.length()) < LENGTH_ERROR &&
+                            Math.abs(DC.length()-AD.length()) < LENGTH_ERROR) {
+
+                        Vector2D AC = new Vector2D(middle, p3);
+                        Vector2D BD = new Vector2D(p2, p4);
+                        //If the diagonals length are quite the same
+                        //Square
+                        if (Math.abs(AC.length()-BD.length()) < LENGTH_ERROR) {
+                            PointF baryCenter = MathTools.getBarycenter(sortedPoints);
+                            ArrayList<Float> l2 = new ArrayList<Float>();
+                            l2.add(MathTools.distance(middle, p2));
+                            l2.add(MathTools.distance(p2, p3));
+                            l2.add(MathTools.distance(p3, p4));
+                            float edgeLength = MathTools.mean(l2);
+                            float angle = MathTools.getAngle(AB);
+                            drawingPanel.addSquare(new Square(baryCenter, edgeLength, angle));
+                        }
+                        //Else Losange
+                        else {
+
+                        }
+                    }
+                    else {
+                        //Rectangle or parallélogramme or trapèze
+                        //Check perpendicularity
+                        //Rectangle
+                        //Other
+                        //Check length again
+                    }
+                    /*//TODO : check rect/square/trapeze
                     ArrayList<PointF> pl = new ArrayList<PointF>();
                     pl.add(middle);
                     pl.add(p2);
                     pl.add(p3);
                     pl.add(p4);
                     pl.add(middle);
-                    drawingPanel.addPolyLine(new PolyLine(pl));
+                    drawingPanel.addPolyLine(new PolyLine(pl));*/
                 }
                 //It is a polyLine
                 else {
@@ -102,15 +165,27 @@ public class ShapeDetector {
         }
     }
 
-    /**
-     *
-     * @param p1 : the first 2D point
-     * @param p2 : the second 2D point
-     * @return the euclidian distance between the 2D points p1 and p2.
-     */
-    private double distance(PointF p1, PointF p2) {
-        double d = (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y);
-        return Math.sqrt(d);
+    private ArrayList<PointF> sortPoints (PointF p1, PointF p2, PointF p3, PointF p4) {
+        PointF[] res = new PointF[4];
+        ArrayList<PointF> l = new ArrayList<PointF>();
+        l.add(p1);
+        l.add(p2);
+        l.add(p3);
+        l.add(p4);
+        PointF bar = MathTools.getBarycenter(l);
+        float middleX = bar.x;
+        float middleY = bar.y;
+        for (int i = 0; i < 4; i++) {
+            if (l.get(i).x < middleX && l.get(i).y < middleY) res[0] = l.get(i);
+            if (l.get(i).x > middleX && l.get(i).y > middleY) res[1] = l.get(i);
+            if (l.get(i).x > middleX && l.get(i).y < middleY) res[2] = l.get(i);
+            if (l.get(i).x < middleX && l.get(i).y > middleY) res[3] = l.get(i);
+        }
+        ArrayList<PointF> res2 = new ArrayList<PointF>();
+        for (PointF p : res) {
+            res2.add(p);
+        }
+        return res2;
     }
 
     private PointF getMiddlePoint (PointF p1, PointF p2) {

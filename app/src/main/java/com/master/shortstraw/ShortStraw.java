@@ -5,6 +5,8 @@ import android.graphics.RectF;
 import android.util.Log;
 import android.view.View;
 
+import com.master.shortstraw.Model.MathTools;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -71,7 +73,7 @@ public class ShortStraw {
         boundingBox = new RectF(topLeftPoint.x, topLeftPoint.y, bottomRightPoint.x, bottomRightPoint.y);
 
         //Get the boundingBox diagonal
-        double boundingBoxDiagonal = distance(topLeftPoint, bottomRightPoint);
+        double boundingBoxDiagonal = MathTools.distance(topLeftPoint, bottomRightPoint);
 
         //Compute the insertSpacing distance
         return (boundingBoxDiagonal / INTERSPACING_CONSTANT);
@@ -90,7 +92,7 @@ public class ShortStraw {
         for (int i = 1; i < pointList.size(); i++) {
             PointF point1 = pointList.get(i - 1);
             PointF point2 = pointList.get(i);
-            float d = (float) distance(point1, point2);
+            float d = (float) MathTools.distance(point1, point2);
 
             if ((distance+d) >= interSpacingDistance) {
                 PointF newPoint = new PointF();
@@ -122,7 +124,7 @@ public class ShortStraw {
         for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
             PointF point1 = resamplePointList.get(i - STRAW_WINDOW);
             PointF point2 = resamplePointList.get(i + STRAW_WINDOW);
-            straws.add((float) distance(point1, point2));
+            straws.add((float) MathTools.distance(point1, point2));
         }
 
         //Calculate the median of the straws
@@ -215,7 +217,7 @@ public class ShortStraw {
      * @return a boolean
      */
     private boolean isLine (ArrayList<PointF> pList, int c1, int c2) {
-        float distance = (float) distance(pList.get(c1), pList.get(c2));
+        float distance = (float) MathTools.distance(pList.get(c1), pList.get(c2));
         float pathDistance = pathDistance(pList, c1, c2);
         return (distance / pathDistance) > LINE_TGRESHOLD;
     }
@@ -230,7 +232,7 @@ public class ShortStraw {
     private float pathDistance (ArrayList<PointF> pList, int c1, int c2) {
         float d = 0;
         for (int i = c1; i < c2; i++) {
-            d += distance(pList.get(i), pList.get(i+1));
+            d += MathTools.distance(pList.get(i), pList.get(i+1));
         }
         return d;
     }
@@ -279,17 +281,6 @@ public class ShortStraw {
             }
         }
         return new PointF[]{new PointF(minX, minY), new PointF(maxX, maxY)};
-    }
-
-    /**
-     *
-     * @param p1 : the first 2D point
-     * @param p2 : the second 2D point
-     * @return the euclidian distance between the 2D points p1 and p2.
-     */
-    private double distance(PointF p1, PointF p2) {
-        double d = (p1.x-p2.x)*(p1.x-p2.x) + (p1.y-p2.y)*(p1.y-p2.y);
-        return Math.sqrt(d);
     }
 
     public RectF getBoundingBox() {
