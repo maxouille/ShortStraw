@@ -112,6 +112,8 @@ public class ShapeDetector {
                     PointF C = sortedPoints.get(2);
                     PointF D = sortedPoints.get(3);
 
+                    drawingPanel.addPoint(A);
+
                     //Set coordinates for the 4 vectors (AB/DC and AD/BC)
                     AB.setX(A.x, B.x);
                     AB.setY(A.y, B.y);
@@ -192,8 +194,8 @@ public class ShapeDetector {
         for (int i = 0; i < 4; i++) {
             p = l.get(i);
             if (p.x < middleX && p.y < middleY) res[0] = p;
-            if (p.x > middleX && p.y > middleY) res[1] = p;
-            if (p.x > middleX && p.y < middleY) res[2] = p;
+            if (p.x > middleX && p.y < middleY) res[1] = p;
+            if (p.x > middleX && p.y > middleY) res[2] = p;
             if (p.x < middleX && p.y > middleY) res[3] = p;
         }
         return new ArrayList<PointF>(Arrays.asList(res));

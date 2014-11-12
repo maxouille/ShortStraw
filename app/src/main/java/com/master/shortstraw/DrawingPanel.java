@@ -178,12 +178,12 @@ public class DrawingPanel extends View {
                 }
             }
         }
-
+*/
         //draw shapes
         for (PointF p : pList) {
             drawCanvas.drawPoint(p.x, p.y, drawPaintShape);
         }
-
+/*
         for (Line l : lineList) {
             drawCanvas.drawLine(l.getP1().x, l.getP1().y, l.getP2().x, l.getP2().y, drawPaintShape);
         }
@@ -207,7 +207,6 @@ public class DrawingPanel extends View {
             drawCanvas.drawPath(plPath, drawPaintShape);
         }*/
 
-        Log.d("test", "squarelist size : "+squareList.size());
         for (Square s : squareList) {
             drawCanvas.save();
             PointF bar = s.getBaryCenter();
@@ -215,7 +214,7 @@ public class DrawingPanel extends View {
             float length = s.getEdgeLength()/2;
             Log.d("test", "lenght of edge : "+length);
             Log.d("test", "angle : "+s.getAngle());
-            drawCanvas.rotate(-s.getAngle(), s.getBaryCenter().x, s.getBaryCenter().y);
+            drawCanvas.rotate(s.getAngle(), s.getBaryCenter().x, s.getBaryCenter().y);
             RectF square = new RectF(bar.x-length, bar.y-length, bar.x+length, bar.y+length);
             drawCanvas.drawRect(square, drawPaintShape);
             drawCanvas.restore();
