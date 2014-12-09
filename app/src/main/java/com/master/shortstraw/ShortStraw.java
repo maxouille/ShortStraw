@@ -252,11 +252,16 @@ public class ShortStraw {
         int quarter = (c2 - c1) / 4;
         double minValue = Double.POSITIVE_INFINITY;
         int minIndex = 0;
+        Log.d("test", "c1/c2/quarter : "+c1+"/"+c2+"/"+quarter);
         for (int i = c1 + quarter; i < c2 - quarter; i++) {
-            float s = straws.get(i - STRAW_WINDOW);
-            if (s < minValue) {
-                minValue = s;
-                minIndex = i;
+            int ind = i - STRAW_WINDOW;
+            Log.d("test", "index : "+ind);
+            if (i-STRAW_WINDOW >= 0) {
+                float s = straws.get(i - STRAW_WINDOW);
+                if (s < minValue) {
+                    minValue = s;
+                    minIndex = i;
+                }
             }
         }
         return minIndex;

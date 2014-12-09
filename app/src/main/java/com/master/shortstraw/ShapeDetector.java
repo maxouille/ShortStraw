@@ -6,6 +6,7 @@ import android.graphics.PointF;
 import android.util.Log;
 
 import com.master.shortstraw.Model.Line;
+import com.master.shortstraw.Model.Losange;
 import com.master.shortstraw.Model.MathTools;
 import com.master.shortstraw.Model.PolyLine;
 import com.master.shortstraw.Model.Square;
@@ -22,7 +23,6 @@ public class ShapeDetector {
 
     private ArrayList<PointF> corners;
     private DrawingPanel drawingPanel;
-    private Paint drawPaintShape;
 
     private int CLOSE_RANGE_LINE = 50;
     private int CLOSE_RANGE_TRIANGLE = 50;
@@ -32,7 +32,6 @@ public class ShapeDetector {
     public ShapeDetector (ArrayList<PointF> corners, DrawingPanel drawingPanel) {
         this.corners = corners;
         this.drawingPanel = drawingPanel;
-        drawPaintShape = drawingPanel.getDrawPaintShape();
     }
 
     public void detection () {
@@ -151,7 +150,17 @@ public class ShapeDetector {
                         }
                         //Else Losange
                         else {
-
+                            //Get the center
+                            PointF baryCenter = MathTools.getBarycenter(sortedPoints);
+                            ArrayList<Float> l2 = new ArrayList<Float>();
+                            l2.add(MathTools.distance(middle, p2));
+                            l2.add(MathTools.distance(p2, p3));
+                            l2.add(MathTools.distance(p3, p4));
+                            //Get the edge length
+                            float edgeLength = MathTools.mean(l2);
+                            //Get the rotation angle
+                            float angle = MathTools.getAngle(AB);
+                            drawingPanel.addLosange(new Losange(baryCenter, edgeLength, angle, AC.length(), BC.length()));
                         }
                     }
                     else {
@@ -161,7 +170,7 @@ public class ShapeDetector {
                         //Other
                         //Check length again
                     }
-                    /*//TODO : check rect/square/trapeze
+                    /*
                     ArrayList<PointF> pl = new ArrayList<PointF>();
                     pl.add(middle);
                     pl.add(p2);
@@ -177,6 +186,7 @@ public class ShapeDetector {
 
                 break;
             default:
+                break;
         }
     }
 

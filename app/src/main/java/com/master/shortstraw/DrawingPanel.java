@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.master.shortstraw.Model.Line;
+import com.master.shortstraw.Model.Losange;
 import com.master.shortstraw.Model.PolyLine;
 import com.master.shortstraw.Model.Square;
 import com.master.shortstraw.Model.Triangle;
@@ -41,6 +42,11 @@ public class DrawingPanel extends View {
     //canvas bitmap
     private Bitmap canvasBitmap;
 
+    private ArrayList<RectF> savedBoundingBox = new ArrayList<RectF>();
+    private ArrayList<PointF> savedPoints = new ArrayList<PointF>();
+    private ArrayList<PointF> savedResampledPoints = new ArrayList<PointF>();
+    private ArrayList<PointF> savedCorners = new ArrayList<PointF>();
+
     private boolean drawLine = true;
     private boolean drawPoints = false;
     private boolean drawSampledPoints = false;
@@ -55,6 +61,7 @@ public class DrawingPanel extends View {
     private ArrayList<Line> lineList = new ArrayList<Line>();
     private ArrayList<Triangle> triangleList = new ArrayList<Triangle>();
     private ArrayList<Square> squareList = new ArrayList<Square>();
+    private ArrayList<Losange> losangeList = new ArrayList<Losange>();
     private ArrayList<PolyLine> polyLineList = new ArrayList<PolyLine>();
 
     public DrawingPanel(Context context, AttributeSet attrs){
@@ -144,51 +151,17 @@ public class DrawingPanel extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
-/*
-        //Draw the boundingBox
-        if (drawBox) {
-            drawCanvas.drawRect(ss.getBoundingBox(), drawPaintBox);
-        }
-*/
-        if (drawLine) {
-            //Draw the stroke
-            drawCanvas.drawPath(drawPath, drawPaintLine);
-        }
-/*
-        if(drawPoints) {
-            //Draw the points not sampled
-            for (PointF po : pointList) {
-                drawCanvas.drawPoint(po.x, po.y, drawPaintPoints);
-            }
-        }
 
-        //Draw sampled points
-        if (drawSampledPoints) {
-            for (PointF p : ss.getResampledPoints()) {
-                drawCanvas.drawPoint(p.x, p.y, drawPaintSampledPoints);
-            }
-        }
-
-        //Check if there is no error or if the list is not empty
-        if (cornerPoints != null && cornerPoints.size() != 0) {
-            if (drawCorners) {
-                //Draw corners
-                for (PointF po : cornerPoints) {
-                    drawCanvas.drawPoint(po.x, po.y, drawPaintCorners);
-                }
-            }
-        }
-*/
         //draw shapes
         for (PointF p : pList) {
-            drawCanvas.drawPoint(p.x, p.y, drawPaintShape);
-        }
-/*
-        for (Line l : lineList) {
-            drawCanvas.drawLine(l.getP1().x, l.getP1().y, l.getP2().x, l.getP2().y, drawPaintShape);
+            canvas.drawPoint(p.x, p.y, drawPaintShape);
         }
 
-        for (Triangle t : triangleList) {
+        for (Line l : lineList) {
+            canvas.drawLine(l.getP1().x, l.getP1().y, l.getP2().x, l.getP2().y, drawPaintShape);
+        }
+
+       /* for (Triangle t : triangleList) {
             Path triangle = new Path();
             triangle.moveTo(t.getP1().x, t.getP1().y);
             triangle.lineTo(t.getP2().x, t.getP2().y);
@@ -207,20 +180,71 @@ public class DrawingPanel extends View {
             drawCanvas.drawPath(plPath, drawPaintShape);
         }*/
 
-        for (Square s : squareList) {
+       /* for (Square s : squareList) {
             drawCanvas.save();
             PointF bar = s.getBaryCenter();
-            Log.d("test", "bary : x : "+bar.x + " y : "+bar.y);
             float length = s.getEdgeLength()/2;
-            Log.d("test", "lenght of edge : "+length);
-            Log.d("test", "angle : "+s.getAngle());
-            drawCanvas.rotate(s.getAngle(), s.getBaryCenter().x, s.getBaryCenter().y);
+            drawCanvas.rotate(s.getAngle(), bar.x, bar.y);
             RectF square = new RectF(bar.x-length, bar.y-length, bar.x+length, bar.y+length);
             drawCanvas.drawRect(square, drawPaintShape);
             drawCanvas.restore();
         }
 
+        for (Losange l : losangeList) {
+            drawCanvas.save();
+            PointF bar = l.getBaryCenter();
+            drawCanvas.rotate(l.getAngle(), bar.x, bar.y);
+            Path path = new Path();
+            path.moveTo(l.getP1().x, l.getP1().y);
+            path.lineTo(l.getP2().x, l.getP2().y);
+            path.lineTo(l.getP3().x, l.getP3().y);
+            path.lineTo(l.getP4().x, l.getP4().y);
+            path.lineTo(l.getP1().x, l.getP1().y);
+            drawCanvas.drawPath(path, drawPaintShape);
+            drawCanvas.restore();
+        }*/
 
+        //Draw the boundingBox
+        if (savedBoundingBox != null && savedBoundingBox.size() != 0) {
+            if (drawBox) {
+                for (RectF r : savedBoundingBox) {
+                    canvas.drawRect(r, drawPaintBox);
+                }
+            }
+        }
+
+        //Draw the strokes interpolates from points
+        if (drawLine) {
+               canvas.drawPath(drawPath, drawPaintLine);
+        }
+
+        //Draw the points that are not sampled
+        if (savedPoints != null && savedPoints.size() != 0) {
+            if (drawPoints) {
+                for (PointF po : savedPoints) {
+                    canvas.drawPoint(po.x, po.y, drawPaintPoints);
+                }
+            }
+        }
+
+        //Draw sampled points
+        if (savedResampledPoints != null && savedResampledPoints.size() != 0) {
+            if (drawSampledPoints) {
+                for (PointF p : savedResampledPoints) {
+                    canvas.drawPoint(p.x, p.y, drawPaintSampledPoints);
+                }
+            }
+        }
+
+        //Check if there is no error or if the list is not empty
+        if (savedCorners != null && savedCorners.size() != 0) {
+            if (drawCorners) {
+                //Draw corners
+                for (PointF po : savedCorners) {
+                    canvas.drawPoint(po.x, po.y, drawPaintCorners);
+                }
+            }
+        }
 
     }
 
@@ -240,6 +264,7 @@ public class DrawingPanel extends View {
             case MotionEvent.ACTION_MOVE:
                 pointList.add(new PointF(touchX, touchY));
                 drawPath.lineTo(touchX, touchY);
+
                 break;
             case MotionEvent.ACTION_UP:
                 drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
@@ -247,9 +272,22 @@ public class DrawingPanel extends View {
                 ss = new ShortStraw(this);
                 cornerPoints = ss.getCornerPoints(pointList);
 
+                for (PointF c : cornerPoints) {
+                    savedCorners.add(c);
+                }
+
+                savedBoundingBox.add(ss.getBoundingBox());
+
+                for (PointF p : pointList) {
+                    savedPoints.add(p);
+                }
+
+                for (PointF pp : ss.getResampledPoints()) {
+                    savedResampledPoints.add(pp);
+                }
+
                 //Set the cornerPoints into the shapeDetector
                 sd.setCorners(cornerPoints);
-
                 sd.detection();
 
                 break;
@@ -258,6 +296,7 @@ public class DrawingPanel extends View {
         }
 
         invalidate();
+
         return true;
     }
 
@@ -369,6 +408,14 @@ public class DrawingPanel extends View {
     }
 
     /**
+     * Save a losange into the list
+     * @param l
+     */
+    public void addLosange (Losange l) {
+        losangeList.add(l);
+    }
+
+    /**
      * Save a polyLine into the list
      * @param pl
      */
@@ -384,7 +431,7 @@ public class DrawingPanel extends View {
         drawPoints = false;
         drawSampledPoints = false;
         drawBox = false;
-        drawCorners = true;
+        drawCorners = false;
     }
 
     /**
@@ -401,6 +448,10 @@ public class DrawingPanel extends View {
         triangleList.clear();
         squareList.clear();
         polyLineList.clear();
+        savedBoundingBox.clear();
+        savedPoints.clear();
+        savedResampledPoints.clear();
+        savedCorners.clear();
         invalidate();
     }
 }
