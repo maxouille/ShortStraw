@@ -43,11 +43,13 @@ public class DrawingPanel extends View {
     private Bitmap canvasBitmap;
 
     private ArrayList<RectF> savedBoundingBox = new ArrayList<RectF>();
+    private ArrayList<Path> savedStrokes = new ArrayList<Path>();
     private ArrayList<PointF> savedPoints = new ArrayList<PointF>();
     private ArrayList<PointF> savedResampledPoints = new ArrayList<PointF>();
     private ArrayList<PointF> savedCorners = new ArrayList<PointF>();
 
-    private boolean drawLine = true;
+    private boolean drawLine = false;
+    private boolean drawCurrentLine = true;
     private boolean drawPoints = false;
     private boolean drawSampledPoints = false;
     private boolean drawBox = false;
@@ -190,19 +192,20 @@ public class DrawingPanel extends View {
             drawCanvas.restore();
         }
 
-        for (Losange l : losangeList) {
-            drawCanvas.save();
+        */for (Losange l : losangeList) {
+            Log.d("test", "draw losange");
+            canvas.save();
             PointF bar = l.getBaryCenter();
-            drawCanvas.rotate(l.getAngle(), bar.x, bar.y);
+            canvas.rotate(l.getAngle(), bar.x, bar.y);
             Path path = new Path();
             path.moveTo(l.getP1().x, l.getP1().y);
             path.lineTo(l.getP2().x, l.getP2().y);
             path.lineTo(l.getP3().x, l.getP3().y);
             path.lineTo(l.getP4().x, l.getP4().y);
             path.lineTo(l.getP1().x, l.getP1().y);
-            drawCanvas.drawPath(path, drawPaintShape);
-            drawCanvas.restore();
-        }*/
+            canvas.drawPath(path, drawPaintShape);
+            canvas.restore();
+        }
 
         //Draw the boundingBox
         if (savedBoundingBox != null && savedBoundingBox.size() != 0) {
@@ -214,8 +217,16 @@ public class DrawingPanel extends View {
         }
 
         //Draw the strokes interpolates from points
-        if (drawLine) {
-               canvas.drawPath(drawPath, drawPaintLine);
+        if (savedStrokes != null && savedStrokes.size() != 0) {
+            if (drawLine) {
+                for (Path path : savedStrokes) {
+                    canvas.drawPath(path, drawPaintLine);
+                }
+            }
+        }
+
+        if (drawCurrentLine) {
+                canvas.drawPath(drawPath, drawPaintLine);
         }
 
         //Draw the points that are not sampled
@@ -264,27 +275,34 @@ public class DrawingPanel extends View {
             case MotionEvent.ACTION_MOVE:
                 pointList.add(new PointF(touchX, touchY));
                 drawPath.lineTo(touchX, touchY);
-
                 break;
             case MotionEvent.ACTION_UP:
                 drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
-                drawLine = false;
+                drawCurrentLine = false;
                 ss = new ShortStraw(this);
                 cornerPoints = ss.getCornerPoints(pointList);
 
-                for (PointF c : cornerPoints) {
-                    savedCorners.add(c);
+                if (cornerPoints != null) {
+                    for (PointF c : cornerPoints) {
+                        savedCorners.add(c);
+                    }
                 }
 
                 savedBoundingBox.add(ss.getBoundingBox());
 
-                for (PointF p : pointList) {
-                    savedPoints.add(p);
+                if (pointList != null) {
+                    for (PointF p : pointList) {
+                        savedPoints.add(p);
+                    }
                 }
 
-                for (PointF pp : ss.getResampledPoints()) {
-                    savedResampledPoints.add(pp);
+                if (ss.getResampledPoints() != null) {
+                    for (PointF pp : ss.getResampledPoints()) {
+                        savedResampledPoints.add(pp);
+                    }
                 }
+
+                savedStrokes.add(new Path(drawPath));
 
                 //Set the cornerPoints into the shapeDetector
                 sd.setCorners(cornerPoints);
@@ -427,7 +445,8 @@ public class DrawingPanel extends View {
      * Restore the default boolean for a new Path
      */
     public void restorDefaultBooleans() {
-        drawLine = true;
+        drawCurrentLine = true;
+        drawLine = false;
         drawPoints = false;
         drawSampledPoints = false;
         drawBox = false;
@@ -452,6 +471,7 @@ public class DrawingPanel extends View {
         savedPoints.clear();
         savedResampledPoints.clear();
         savedCorners.clear();
+        savedStrokes.clear();
         invalidate();
     }
 }

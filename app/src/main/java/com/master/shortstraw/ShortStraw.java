@@ -34,7 +34,7 @@ public class ShortStraw {
      */
     public ArrayList<PointF> getCornerPoints(ArrayList<PointF> pList) {
         if (pList.isEmpty() || pList.size() < 2) {
-            return null;
+            return new ArrayList<PointF>();
         }
         else {
             float interSpacingDistance = (float) determineResamplingSpacing(pList);
@@ -55,7 +55,7 @@ public class ShortStraw {
      * @return an ArraList of the corners indices
      */
     public ArrayList<Integer> getCornersIndices (ArrayList<PointF> pList) {
-        if (pList.isEmpty() || pList.size() < 2) return null;
+        if (pList.isEmpty() || pList.size() < 2) return new ArrayList<Integer>();
         float interSpacingDistance = (float) determineResamplingSpacing(pList);
         ArrayList<PointF> resampledPoints = resampling(pList, interSpacingDistance);
         return getCorners(resampledPoints);
@@ -93,7 +93,7 @@ public class ShortStraw {
         for (int i = 1; i < pointList.size(); i++) {
             PointF point1 = pointList.get(i - 1);
             PointF point2 = pointList.get(i);
-            float d = (float) MathTools.distance(point1, point2);
+            float d = MathTools.distance(point1, point2);
 
             if ((distance+d) >= interSpacingDistance) {
                 PointF newPoint = new PointF();
@@ -115,15 +115,18 @@ public class ShortStraw {
      * @return the corners indexes within the stroke
      */
     private ArrayList<Integer> getCorners (ArrayList<PointF> resamplePointList) {
+
+        Log.d("test", "nb of point in getcorners :"+resamplePointList.size());
         //Create a new ArrayList for the corners indexes
         ArrayList<Integer> corners = new ArrayList<Integer>();
         corners.add(0);
         //Create a new ArrayList for the straws
         ArrayList<Float> straws = new ArrayList<Float>();
 
-        if (resamplePointList.size() > STRAW_WINDOW) {
+        if (resamplePointList.size() >= STRAW_WINDOW) {
             //Add the distance between the i - STRAW_WINDOW and i + STRAW_WINDOW points
             for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
+                Log.d("test", "index in 1 loop : "+i);
                 PointF point1 = resamplePointList.get(i - STRAW_WINDOW);
                 PointF point2 = resamplePointList.get(i + STRAW_WINDOW);
                 straws.add(MathTools.distance(point1, point2));
@@ -133,6 +136,7 @@ public class ShortStraw {
             float t = (float) (median(straws) * MEDIAN_TRESHOLD);
 
             for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
+                Log.d("test", "index in 2 loop: "+i);
                 float s = straws.get(i - STRAW_WINDOW);
                 //If straw < median
                 if (s < t) {
@@ -145,7 +149,7 @@ public class ShortStraw {
                             localMinIndex = i;
                         }
                         i++;
-                        s = straws.get(i - STRAW_WINDOW);
+                       // s = straws.get(i - STRAW_WINDOW);
                     }
                     //Add the local min index to the array list
                     corners.add(localMinIndex);
@@ -194,6 +198,8 @@ public class ShortStraw {
                 c2 = corners.get(i);
                 if (!isLine(pList, c1, c2)) {
                     int newCorner = halfWayCorner(straws, c1, c2);
+                    // This checking was not in the paper,
+                    // but prevents adding undefined points
                     if (newCorner > c1 && newCorner < c2) {
                         corners.add(i, newCorner);
                         go = false;
@@ -221,7 +227,7 @@ public class ShortStraw {
      * @return a boolean
      */
     private boolean isLine (ArrayList<PointF> pList, int c1, int c2) {
-        float distance = (float) MathTools.distance(pList.get(c1), pList.get(c2));
+        float distance = MathTools.distance(pList.get(c1), pList.get(c2));
         float pathDistance = pathDistance(pList, c1, c2);
         return (distance / pathDistance) > LINE_TGRESHOLD;
     }
@@ -253,17 +259,13 @@ public class ShortStraw {
         double minValue = Double.POSITIVE_INFINITY;
         int minIndex = 0;
         Log.d("test", "c1/c2/quarter : "+c1+"/"+c2+"/"+quarter);
-        for (int i = c1 + quarter; i < c2 - quarter; i++) {
-            int ind = i - STRAW_WINDOW;
-            Log.d("test", "index : "+ind);
-            if (i-STRAW_WINDOW >= 0) {
+        for (int i = c1 + quarter; i < (c2 - quarter); i++) {
                 float s = straws.get(i - STRAW_WINDOW);
                 if (s < minValue) {
                     minValue = s;
                     minIndex = i;
                 }
             }
-        }
         return minIndex;
     }
 
