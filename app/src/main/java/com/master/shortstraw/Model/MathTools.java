@@ -1,6 +1,7 @@
 package com.master.shortstraw.Model;
 
 import android.graphics.PointF;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -41,11 +42,34 @@ public class MathTools {
      * @return the angle between v and the horizontal
      */
     public static float getAngle (Vector2D v) {
+        double res2;
+        //Go to the right
+        if (v.getX() > 0) {
+            Vector2D horizontal = new Vector2D(1, 0);
+            double res = Math.acos(dot(v, horizontal) / (norm(v) * norm(horizontal)));
+            res2 = res * 180 / Math.PI;
+            if (v.getY() < 0) {
+                res2 *= -1;
+            }
+        }
+        //Go to the left
+        else {
+            Vector2D horizontal = new Vector2D(-1, 0);
+            double res = Math.acos(dot(v, horizontal) / (norm(v) * norm(horizontal)));
+            res2 = -res * 180 / Math.PI;
+            if (v.getY() < 0) {
+                res2 *= -1;
+            }
+        }
+
+        return (float) res2;
+    }
+    /*public static float getAngle (Vector2D v) {
         Vector2D horizontal = new Vector2D(1,0);
         double res = Math.acos( dot(v, horizontal) / (norm(v) * norm(horizontal)));
         double res2 = res*180/Math.PI;
         return (float) res2;
-    }
+    }*/
 
     /**
      * @param v1 : the first vector2D

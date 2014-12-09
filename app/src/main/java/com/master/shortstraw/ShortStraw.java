@@ -39,7 +39,6 @@ public class ShortStraw {
         else {
             float interSpacingDistance = (float) determineResamplingSpacing(pList);
             resampledPoints = resampling(pList, interSpacingDistance);
-            Log.d("test", "nb points : "+resampledPoints.size());
             ArrayList<Integer> indicesPoints = getCorners(resampledPoints);
             ArrayList<PointF> cornerPoints = new ArrayList<PointF>();
             for (int i = 0; i < indicesPoints.size(); i++) {
@@ -116,7 +115,6 @@ public class ShortStraw {
      */
     private ArrayList<Integer> getCorners (ArrayList<PointF> resamplePointList) {
 
-        Log.d("test", "nb of point in getcorners :"+resamplePointList.size());
         //Create a new ArrayList for the corners indexes
         ArrayList<Integer> corners = new ArrayList<Integer>();
         corners.add(0);
@@ -126,7 +124,6 @@ public class ShortStraw {
         if (resamplePointList.size() >= STRAW_WINDOW) {
             //Add the distance between the i - STRAW_WINDOW and i + STRAW_WINDOW points
             for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
-                Log.d("test", "index in 1 loop : "+i);
                 PointF point1 = resamplePointList.get(i - STRAW_WINDOW);
                 PointF point2 = resamplePointList.get(i + STRAW_WINDOW);
                 straws.add(MathTools.distance(point1, point2));
@@ -136,7 +133,6 @@ public class ShortStraw {
             float t = (float) (median(straws) * MEDIAN_TRESHOLD);
 
             for (int i = STRAW_WINDOW; i < resamplePointList.size() - STRAW_WINDOW; i++) {
-                Log.d("test", "index in 2 loop: "+i);
                 float s = straws.get(i - STRAW_WINDOW);
                 //If straw < median
                 if (s < t) {
@@ -168,7 +164,6 @@ public class ShortStraw {
      */
     private float median (ArrayList<Float> values) {
         //Sort the array List into ascending order
-        Log.d("test", "values length : " +values.size());
         Collections.sort(values);
         int m;
         if (values.size() / 2 == 0) {
@@ -258,9 +253,8 @@ public class ShortStraw {
         int quarter = (c2 - c1) / 4;
         double minValue = Double.POSITIVE_INFINITY;
         int minIndex = 0;
-        Log.d("test", "c1/c2/quarter : "+c1+"/"+c2+"/"+quarter);
         for (int i = c1 + quarter; i < (c2 - quarter); i++) {
-                float s = straws.get(i - STRAW_WINDOW);
+                float s = straws.get(i - STRAW_WINDOW-1);
                 if (s < minValue) {
                     minValue = s;
                     minIndex = i;

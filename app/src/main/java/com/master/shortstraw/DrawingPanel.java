@@ -17,6 +17,7 @@ import android.view.View;
 import com.master.shortstraw.Model.Line;
 import com.master.shortstraw.Model.Losange;
 import com.master.shortstraw.Model.PolyLine;
+import com.master.shortstraw.Model.Rectangle;
 import com.master.shortstraw.Model.Square;
 import com.master.shortstraw.Model.Triangle;
 
@@ -65,6 +66,7 @@ public class DrawingPanel extends View {
     private ArrayList<Square> squareList = new ArrayList<Square>();
     private ArrayList<Losange> losangeList = new ArrayList<Losange>();
     private ArrayList<PolyLine> polyLineList = new ArrayList<PolyLine>();
+    private ArrayList<Rectangle> rectangleList = new ArrayList<Rectangle>();
 
     public DrawingPanel(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -182,17 +184,28 @@ public class DrawingPanel extends View {
             drawCanvas.drawPath(plPath, drawPaintShape);
         }*/
 
-       /* for (Square s : squareList) {
-            drawCanvas.save();
+        for (Square s : squareList) {
+            canvas.save();
             PointF bar = s.getBaryCenter();
             float length = s.getEdgeLength()/2;
-            drawCanvas.rotate(s.getAngle(), bar.x, bar.y);
+            canvas.rotate(s.getAngle(), bar.x, bar.y);
             RectF square = new RectF(bar.x-length, bar.y-length, bar.x+length, bar.y+length);
-            drawCanvas.drawRect(square, drawPaintShape);
-            drawCanvas.restore();
+            canvas.drawRect(square, drawPaintShape);
+            canvas.restore();
         }
 
-        */for (Losange l : losangeList) {
+        for (Rectangle r : rectangleList) {
+            canvas.save();
+            PointF bar = r.getBaryCenter();
+            float c1 = r.getEdgeLength1()/2;
+            float c2 = r.getEdgeLength2()/2;
+            canvas.rotate(r.getAngle(), bar.x, bar.y);
+            RectF square = new RectF(bar.x-c1, bar.y-c2, bar.x+c1, bar.y+c2);
+            canvas.drawRect(square, drawPaintShape);
+            canvas.restore();
+        }
+
+        /*for (Losange l : losangeList) {
             Log.d("test", "draw losange");
             canvas.save();
             PointF bar = l.getBaryCenter();
@@ -205,7 +218,7 @@ public class DrawingPanel extends View {
             path.lineTo(l.getP1().x, l.getP1().y);
             canvas.drawPath(path, drawPaintShape);
             canvas.restore();
-        }
+        }*/
 
         //Draw the boundingBox
         if (savedBoundingBox != null && savedBoundingBox.size() != 0) {
@@ -442,6 +455,13 @@ public class DrawingPanel extends View {
     }
 
     /**
+     * Save a rectangle into the list
+     * @param r
+     */
+    public void addRectangle (Rectangle r) {
+        rectangleList.add(r);
+    }
+    /**
      * Restore the default boolean for a new Path
      */
     public void restorDefaultBooleans() {
@@ -467,6 +487,7 @@ public class DrawingPanel extends View {
         triangleList.clear();
         squareList.clear();
         polyLineList.clear();
+        rectangleList.clear();
         savedBoundingBox.clear();
         savedPoints.clear();
         savedResampledPoints.clear();
