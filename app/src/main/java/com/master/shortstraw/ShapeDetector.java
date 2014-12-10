@@ -1,7 +1,5 @@
 package com.master.shortstraw;
 
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PointF;
 import android.util.Log;
 
@@ -15,7 +13,6 @@ import com.master.shortstraw.Model.Triangle;
 import com.master.shortstraw.Model.Vector2D;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by Maxence Bobin on 10/11/14.
@@ -71,8 +68,7 @@ public class ShapeDetector {
                 p4 = corners.get(3);
 
                 if (MathTools.distance(p1, p4) < CLOSE_RANGE_TRIANGLE) {
-                    PointF middle = getMiddlePoint(p1, p4);
-                    drawingPanel.addTriangle(new Triangle(middle, p2, p3));
+                    drawingPanel.addTriangle(new Triangle(p1, p2, p3));
                 }
                 else {
                     drawingPanel.addPolyLine(new PolyLine(corners));
@@ -99,43 +95,18 @@ public class ShapeDetector {
                 //It is a quadrangle
                 if (MathTools.distance(p1, p5) < CLOSE_RANGE_SQUARE) {
 
-                    //Sort points to be A top left, B top right, C bottom right and D bottom left
-                    /*ArrayList<PointF> sortedPoints = sortPoints (p1, p2, p3, p4);
-
-                    Log.d("test", "sortedpoints : "+sortedPoints);
-                    Log.d("test", "p2 "+p2.toString());
-                    Log.d("test", "p3 " + p3.toString());
-                    Log.d("test", "p4 " + p4.toString());
-                    Log.d("test", "sortedPoints lenght : " + sortedPoints.size());
-
-                    Log.d("test", "sort 0 " + sortedPoints.get(0).toString());
-                    Log.d("test", "sort 1 "+sortedPoints.get(1).toString());
-                    Log.d("test", "sort 2 "+sortedPoints.get(2).toString());
-                    Log.d("test", "sort 3 " + sortedPoints.get(3).toString());*/
-                    /*PointF A = sortedPoints.get(0);
-                    PointF B = sortedPoints.get(1);
-                    PointF C = sortedPoints.get(2);
-                    PointF D = sortedPoints.get(3);*/
-
-                    PointF A = p1;
-                    PointF B = p2;
-                    PointF C = p3;
-                    PointF D = p4;
-
-                    //drawingPanel.addPoint(A);
-
                     //Set coordinates for the 4 vectors (AB/DC and AD/BC)
-                    AB.setX(A.x, B.x);
-                    AB.setY(A.y, B.y);
+                    AB.setX(p1.x, p2.x);
+                    AB.setY(p1.y, p2.y);
 
-                    DC.setX(D.x, C.x);
-                    DC.setY(D.y, C.y);
+                    DC.setX(p4.x, p3.x);
+                    DC.setY(p4.y, p3.y);
 
-                    AD.setX(A.x, D.x);
-                    AD.setY(A.y, D.y);
+                    AD.setX(p1.x, p4.x);
+                    AD.setY(p1.y, p4.y);
 
-                    BC.setX(B.x, C.x);
-                    BC.setY(B.y, C.y);
+                    BC.setX(p2.x, p3.x);
+                    BC.setY(p2.y, p3.y);
 
                     Vector2D AC = new Vector2D(p1, p3);
                     Vector2D BD = new Vector2D(p2, p4);
@@ -201,46 +172,6 @@ public class ShapeDetector {
                 break;
         }
     }
-
-   /* private ArrayList<PointF> sortPoints (PointF p1, PointF p2, PointF p3, PointF p4) {
-        PointF[] res = new PointF[4];
-        ArrayList<PointF> l = new ArrayList<PointF>();
-        l.add(p1);
-        l.add(p2);
-        l.add(p3);
-        l.add(p4);
-        Log.d("test", "sortPoits function : "+l);
-        float a1 = (p3.y - p1.y)/(p3.x - p1.x);
-        float b1 = p3.y - a1*p3.x;
-        float a2 = (p4.y - p2.y)/(p4.x - p2.x);
-        float b2 = p4.y - a2*p4.x;
-
-        PointF bar = new PointF(((b2-b1)/(a1-a2)), ((a1*b2 - a2*b1)/(a1 - a2)));
-        Log.d("test", "bar : "+bar);
-        float middleX = bar.x;
-        float middleY = bar.y;
-        PointF p;
-        for (int i = 0; i < 4; i++) {
-            p = l.get(i);
-            if (p.x <= middleX && p.y <= middleY) {
-                Log.d("test", "point 0 : "+p);
-                res[0] = p;
-            }
-            if (p.x > middleX && p.y < middleY) {
-                Log.d("test", "point 1 : "+p);
-                res[1] = p;
-            }
-            if (p.x > middleX && p.y >= middleY) {
-                Log.d("test", "point 2 : "+p);
-                res[2] = p;
-            }
-            if (p.x <= middleX && p.y > middleY) {
-                Log.d("test", "point 3 : "+p);
-                res[3] = p;
-            }
-        }
-        return new ArrayList<PointF>(Arrays.asList(res));
-    }*/
 
     private PointF getMiddlePoint (PointF p1, PointF p2) {
         return new PointF((p1.x + p2.x)/2, (p1.y + p2.y)/2);

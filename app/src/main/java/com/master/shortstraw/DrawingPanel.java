@@ -165,13 +165,13 @@ public class DrawingPanel extends View {
             canvas.drawLine(l.getP1().x, l.getP1().y, l.getP2().x, l.getP2().y, drawPaintShape);
         }
 
-       /* for (Triangle t : triangleList) {
+        for (Triangle t : triangleList) {
             Path triangle = new Path();
             triangle.moveTo(t.getP1().x, t.getP1().y);
             triangle.lineTo(t.getP2().x, t.getP2().y);
             triangle.lineTo(t.getP3().x, t.getP3().y);
             triangle.close();
-            drawCanvas.drawPath(triangle, drawPaintShape);
+            canvas.drawPath(triangle, drawPaintShape);
         }
 
         for (PolyLine pl : polyLineList) {
@@ -181,8 +181,8 @@ public class DrawingPanel extends View {
             for (int i = 1; i < pList.size(); i++) {
                 plPath.lineTo(pList.get(i).x, pList.get(i).y);
             }
-            drawCanvas.drawPath(plPath, drawPaintShape);
-        }*/
+            canvas.drawPath(plPath, drawPaintShape);
+        }
 
         for (Square s : squareList) {
             canvas.save();
@@ -206,7 +206,6 @@ public class DrawingPanel extends View {
         }
 
         for (Losange l : losangeList) {
-            Log.d("test", "draw losange");
             canvas.save();
             PointF bar = l.getBaryCenter();
             float diag1 = l.getDiag1();
