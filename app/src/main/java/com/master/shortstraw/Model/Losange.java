@@ -13,11 +13,10 @@ public class Losange {
     private PointF p2;
     private PointF p3;
     private PointF p4;
-    private float edgeLength;
     private PointF baryCenter;
     private float angle;
-    private float littleDiag;
-    private float bigDiag;
+    private float diag1;
+    private float diag2;
 
     public Losange() {
         p1 = new PointF();
@@ -25,28 +24,20 @@ public class Losange {
         p3 = new PointF();
         p4 = new PointF();
         baryCenter = new PointF();
-        edgeLength = 0;
         angle = 0;
-        littleDiag = 0;
-        bigDiag = 0;
+        diag1 = 0;
+        diag2 = 0;
     }
 
-    public Losange(PointF baryCenter, float edgeLength, float angle, float diag1, float diag2) {
+    public Losange(PointF baryCenter, float angle, float diag1, float diag2) {
         this.baryCenter = baryCenter;
-        this.edgeLength = edgeLength;
         this.angle = angle;
-        if (diag1 < diag2) {
-            littleDiag = diag1;
-            bigDiag = diag2;
-        }
-        else {
-            littleDiag = diag2;
-            bigDiag = diag1;
-        }
-        p1 = new PointF(baryCenter.x, baryCenter.y-littleDiag/2);
-        p2 = new PointF(baryCenter.x-bigDiag/2, baryCenter.y);
-        p3 = new PointF(baryCenter.x, baryCenter.y+littleDiag/2);
-        p4 = new PointF(baryCenter.x+littleDiag/2, baryCenter.y);
+        this.diag1 = diag1;
+        this.diag2 = diag2;
+        p1 = new PointF();
+        p2 = new PointF();
+        p3 = new PointF();
+        p4 = new PointF();
     }
 
     public PointF getP1() {
@@ -81,14 +72,6 @@ public class Losange {
         this.p4 = p4;
     }
 
-    public float getEdgeLength() {
-        return edgeLength;
-    }
-
-    public void setEdgeLength(float edgeLength) {
-        this.edgeLength = edgeLength;
-    }
-
     public PointF getBaryCenter() {
         return baryCenter;
     }
@@ -105,19 +88,19 @@ public class Losange {
         this.angle = angle;
     }
 
-    public float getLittleDiag() {
-        return littleDiag;
+    public float getDiag1() {
+        return diag1;
     }
 
-    public void setLittleDiag(float littleDiag) {
-        this.littleDiag = littleDiag;
+    public void setDiag1(float diag1) {
+        this.diag1 = diag1;
     }
 
-    public float getBigDiag() {
-        return bigDiag;
+    public float getDiag2() {
+        return diag2;
     }
 
-    public void setBigDiag(float bigDiag) {
-        this.bigDiag = bigDiag;
+    public void setDiag2(float diag2) {
+        this.diag2 = diag2;
     }
 }

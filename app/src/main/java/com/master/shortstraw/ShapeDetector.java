@@ -162,15 +162,9 @@ public class ShapeDetector {
                         //Else Losange
                         else {
                           Log.d("test", "in losange");
-                            /*ArrayList<Float> l2 = new ArrayList<Float>();
-                            l2.add(MathTools.distance(p1, p2));
-                            l2.add(MathTools.distance(p2, p3));
-                            l2.add(MathTools.distance(p3, p4));
-                            //Get the edge length
-                            float edgeLength = MathTools.mean(l2);
-                            //Get the rotation angle
-                            float angle = MathTools.getAngle(AB);
-                            drawingPanel.addLosange(new Losange(baryCenter, edgeLength, angle, AC.length(), BC.length()));*/
+                            //Get the rotation angle of the diagonal
+                            float angle = MathTools.getAngle(BD);
+                            drawingPanel.addLosange(new Losange(baryCenter, angle, AC.length(), BC.length()));
                         }
                     }
                     else {

@@ -205,20 +205,23 @@ public class DrawingPanel extends View {
             canvas.restore();
         }
 
-        /*for (Losange l : losangeList) {
+        for (Losange l : losangeList) {
             Log.d("test", "draw losange");
             canvas.save();
             PointF bar = l.getBaryCenter();
+            float diag1 = l.getDiag1();
+            float diag2 = l.getDiag2();
             canvas.rotate(l.getAngle(), bar.x, bar.y);
             Path path = new Path();
-            path.moveTo(l.getP1().x, l.getP1().y);
-            path.lineTo(l.getP2().x, l.getP2().y);
-            path.lineTo(l.getP3().x, l.getP3().y);
-            path.lineTo(l.getP4().x, l.getP4().y);
-            path.lineTo(l.getP1().x, l.getP1().y);
+
+            path.moveTo(bar.x, bar.y - (diag1/2));
+            path.lineTo(bar.x - (diag2/2), bar.y);
+            path.lineTo(bar.x, bar.y + (diag1/2));
+            path.lineTo(bar.x + (diag2/2), bar.y);
+            path.lineTo(bar.x, bar.y - (diag1/2));
             canvas.drawPath(path, drawPaintShape);
             canvas.restore();
-        }*/
+        }
 
         //Draw the boundingBox
         if (savedBoundingBox != null && savedBoundingBox.size() != 0) {
@@ -487,6 +490,7 @@ public class DrawingPanel extends View {
         triangleList.clear();
         squareList.clear();
         polyLineList.clear();
+        losangeList.clear();
         rectangleList.clear();
         savedBoundingBox.clear();
         savedPoints.clear();
