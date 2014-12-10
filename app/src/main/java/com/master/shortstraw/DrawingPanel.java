@@ -43,6 +43,8 @@ public class DrawingPanel extends View {
     //canvas bitmap
     private Bitmap canvasBitmap;
 
+    private boolean detected = false;
+
     private ArrayList<RectF> savedBoundingBox = new ArrayList<RectF>();
     private ArrayList<Path> savedStrokes = new ArrayList<Path>();
     private ArrayList<PointF> savedPoints = new ArrayList<PointF>();
@@ -297,31 +299,33 @@ public class DrawingPanel extends View {
                 ss = new ShortStraw(this);
                 cornerPoints = ss.getCornerPoints(pointList);
 
-                if (cornerPoints != null) {
-                    for (PointF c : cornerPoints) {
-                        savedCorners.add(c);
-                    }
-                }
-
-                savedBoundingBox.add(ss.getBoundingBox());
-
-                if (pointList != null) {
-                    for (PointF p : pointList) {
-                        savedPoints.add(p);
-                    }
-                }
-
-                if (ss.getResampledPoints() != null) {
-                    for (PointF pp : ss.getResampledPoints()) {
-                        savedResampledPoints.add(pp);
-                    }
-                }
-
-                savedStrokes.add(new Path(drawPath));
-
                 //Set the cornerPoints into the shapeDetector
                 sd.setCorners(cornerPoints);
                 sd.detection();
+
+                if (detected) {
+                    if (cornerPoints != null) {
+                        for (PointF c : cornerPoints) {
+                            savedCorners.add(c);
+                        }
+                    }
+
+                    savedBoundingBox.add(ss.getBoundingBox());
+
+                    if (pointList != null) {
+                        for (PointF p : pointList) {
+                            savedPoints.add(p);
+                        }
+                    }
+
+                    if (ss.getResampledPoints() != null) {
+                        for (PointF pp : ss.getResampledPoints()) {
+                            savedResampledPoints.add(pp);
+                        }
+                    }
+
+                    savedStrokes.add(new Path(drawPath));
+                }
 
                 break;
             default:
@@ -497,5 +501,13 @@ public class DrawingPanel extends View {
         savedCorners.clear();
         savedStrokes.clear();
         invalidate();
+    }
+
+    public boolean isDetected() {
+        return detected;
+    }
+
+    public void setDetected(boolean detected) {
+        this.detected = detected;
     }
 }

@@ -55,10 +55,12 @@ public class ShapeDetector {
                 else {
                     drawingPanel.addLine(new Line(p1, p2));
                 }
+                drawingPanel.setDetected(true);
                 break;
             //It is a curve or a polyLine
             case 3:
                drawingPanel.addPolyLine(new PolyLine(corners));
+                drawingPanel.setDetected(true);
                break;
             //It is a triangle or just a line
             case 4:
@@ -73,6 +75,7 @@ public class ShapeDetector {
                 else {
                     drawingPanel.addPolyLine(new PolyLine(corners));
                 }
+                drawingPanel.setDetected(true);
                 break;
             //Square or polyLine
             case 5:
@@ -137,6 +140,7 @@ public class ShapeDetector {
                             float angle = MathTools.getAngle(BD);
                             drawingPanel.addLosange(new Losange(baryCenter, angle, AC.length(), BC.length()));
                         }
+                        drawingPanel.setDetected(true);
                     }
                     else {
                         //Rectangle or parallélogramme or trapèze
@@ -154,21 +158,25 @@ public class ShapeDetector {
                             float c2 = MathTools.mean(l2);
                             float angle = MathTools.getAngle(AB);
                             drawingPanel.addRectangle(new Rectangle(baryCenter, c1, c2, angle));
+                            drawingPanel.setDetected(true);
                         }
                         //Other
                         else {
                             Log.d("test", "in other");
+                            drawingPanel.setDetected(false);
                         }
                     }
 
                 }
                 //It is a polyLine
                 else {
+                    drawingPanel.setDetected(true);
                     drawingPanel.addPolyLine(new PolyLine(corners));
                 }
 
                 break;
             default:
+                drawingPanel.setDetected(false);
                 break;
         }
     }
