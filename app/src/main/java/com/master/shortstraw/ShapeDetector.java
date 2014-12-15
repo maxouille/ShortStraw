@@ -32,7 +32,17 @@ public class ShapeDetector {
         this.drawingPanel = drawingPanel;
     }
 
+    private void filterCorners () {
+        for (int i = 1; i < corners.size()-1; i++) {
+            PointF p = corners.get(i);
+
+                if (MathTools.distance(p, corners.get(i+1)) < 50 || MathTools.distance(p, corners.get(i-1)) < 50) {
+                    corners.remove(i);
+            }
+        }
+    }
     public void detection () {
+        filterCorners();
         int nbCorners = corners.size();
         PointF p1;
         PointF p2;
